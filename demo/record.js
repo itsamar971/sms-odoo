@@ -25,10 +25,14 @@ const INIT = fs.readFileSync(path.join(__dirname, 'overlay.js'), 'utf8');
     busyUntil = Date.now() + SEG[key].dur * 1000 + 450;
   };
   const done = async () => { const now = Date.now(); if (busyUntil > now) await wait(busyUntil - now); };
+  // Cursor highlight only: never let a missing/ambiguous target abort the recording.
   const moveTo = async (loc) => {
-    await loc.scrollIntoViewIfNeeded();
-    const b = await loc.boundingBox();
-    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 20 });
+    try {
+      loc = loc.first();
+      await loc.scrollIntoViewIfNeeded({ timeout: 4000 });
+      const b = await loc.boundingBox({ timeout: 4000 });
+      if (b) await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 20 });
+    } catch { /* skip highlight */ }
     await wait(300);
   };
   const click = async (loc, after = 1000) => { loc = loc.first(); await moveTo(loc); await loc.click(); await wait(after); };
@@ -104,7 +108,7 @@ const INIT = fs.readFileSync(path.join(__dirname, 'overlay.js'), 'utf8');
   await page.getByRole('button', { name: 'Run Billing Now' }).click(); await page.getByText('Billing run complete').waitFor(); await wait(800);
   await say('bill2'); await moveTo(page.getByText('Auto-closed').first()); await done();
   await page.getByRole('button', { name: 'Run Billing Now' }).click(); await wait(1500);
-  await say('bill3'); await moveTo(page.getByText('Created', { exact: true })); await done();
+  await say('bill3'); await moveTo(page.locator('.border-emerald-200').getByText('Created', { exact: true })); await done();
   await say('bill4'); await scroll(500); await done();
 
   await go('/invoices?status=DRAFT');
