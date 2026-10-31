@@ -36,6 +36,12 @@ export function saveProduct(id: string | null, raw: z.input<typeof productSchema
   return db.products.insert({ id: newId(), ...input, createdAt: new Date() });
 }
 
+export function setProductActive(id: string, active: boolean) {
+  const db = getDb();
+  if (!db.products.get(id)) throw new NotFoundError("Product");
+  return db.products.update(id, { active });
+}
+
 export function deleteProduct(id: string) {
   const db = getDb();
   if (!db.products.get(id)) throw new NotFoundError("Product");
