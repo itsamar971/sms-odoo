@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "crypto";
 import { z } from "zod";
 import { getDb } from "../db/client";
 import { newId } from "../db/database";
-import { UniqueConstraintError } from "../db/store";
+import { isUniqueConstraintError } from "../db/store";
 import { ForbiddenError, NotFoundError, ServiceError } from "../errors";
 import { resetSchema, signupSchema, staffUserSchema } from "../validation";
 import type { User } from "../db/types";
@@ -56,7 +56,7 @@ export async function signup(raw: z.input<typeof signupSchema>): Promise<User> {
       });
     });
   } catch (e) {
-    if (e instanceof UniqueConstraintError) throw new ServiceError("An account with this email already exists");
+    if (isUniqueConstraintError(e)) throw new ServiceError("An account with this email already exists");
     throw e;
   }
 }
@@ -129,7 +129,7 @@ export async function createStaffUser(raw: z.input<typeof staffUserSchema>, acto
       createdAt: new Date(),
     });
   } catch (e) {
-    if (e instanceof UniqueConstraintError) throw new ServiceError("A user with this email already exists");
+    if (isUniqueConstraintError(e)) throw new ServiceError("A user with this email already exists");
     throw e;
   }
 }

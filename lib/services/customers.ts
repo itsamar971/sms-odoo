@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getDb } from "../db/client";
 import { newId } from "../db/database";
-import { UniqueConstraintError } from "../db/store";
+import { isUniqueConstraintError } from "../db/store";
 import { NotFoundError, ServiceError } from "../errors";
 import { customerSchema } from "../validation";
 import type { Customer } from "../db/types";
@@ -16,7 +16,7 @@ export function saveCustomer(id: string | null, raw: z.input<typeof customerSche
     }
     return db.customers.insert({ id: newId(), ...input, createdAt: new Date() });
   } catch (e) {
-    if (e instanceof UniqueConstraintError) throw new ServiceError("A customer with this email already exists");
+    if (isUniqueConstraintError(e)) throw new ServiceError("A customer with this email already exists");
     throw e;
   }
 }

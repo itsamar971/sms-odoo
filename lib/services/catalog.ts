@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getDb } from "../db/client";
 import { newId } from "../db/database";
-import { UniqueConstraintError } from "../db/store";
+import { isUniqueConstraintError } from "../db/store";
 import { NotFoundError, ServiceError } from "../errors";
 import {
   attributeSchema,
@@ -19,7 +19,7 @@ function friendlyUnique<T>(fn: () => T, message: string): T {
   try {
     return fn();
   } catch (e) {
-    if (e instanceof UniqueConstraintError) throw new ServiceError(message);
+    if (isUniqueConstraintError(e)) throw new ServiceError(message);
     throw e;
   }
 }

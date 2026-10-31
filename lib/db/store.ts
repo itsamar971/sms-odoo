@@ -160,3 +160,8 @@ export class Table<T extends { id: string }> {
     this.cache = null;
   }
 }
+
+/** Bundle-safe check (the DB instance may be created by a different webpack bundle). */
+export function isUniqueConstraintError(e: unknown): e is UniqueConstraintError {
+  return e instanceof Error && e.name === "UniqueConstraintError";
+}

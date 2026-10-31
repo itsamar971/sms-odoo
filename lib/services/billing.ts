@@ -1,6 +1,6 @@
 import { getDb } from "../db/client";
 import { newId } from "../db/database";
-import { UniqueConstraintError } from "../db/store";
+import { isUniqueConstraintError } from "../db/store";
 import { addDays, addPeriod, todayStr } from "../dates";
 import { D, mul, round2, sub as subtract, sum } from "../money";
 import { ServiceError } from "../errors";
@@ -170,7 +170,7 @@ export function billSubscription(subscriptionId: string, asOf: DateStr): Subscri
       res.created++;
       res.invoiceIds.push(invoice.id);
     } catch (e) {
-      if (e instanceof UniqueConstraintError && e.constraint === "invoices.subscription_period") {
+      if (isUniqueConstraintError(e) && e.constraint === "invoices.subscription_period") {
         // Already billed for this period: never bill twice, just move the pointer forward.
         db.subscriptions.update(sub.id, { nextInvoiceDate: next });
         res.skipped++;
