@@ -1,6 +1,6 @@
 # Demo walkthrough video
 
-`brightloop-sms-walkthrough.mp4` is a captioned walkthrough with an Indian-English male voiceover (~7 minutes).
+`brightloop-sms-walkthrough.mp4` is a captioned walkthrough with an Indian-English male voiceover (7 min 50 s).
 It was recorded from the production build with fresh seed data.
 
 ## Regenerate it
