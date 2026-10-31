@@ -16,8 +16,9 @@ const optDate = z
   .union([dateStr, z.literal(""), z.null(), z.undefined()])
   .transform((v) => (v ? v : null));
 const money = z.coerce.number({ invalid_type_error: "Enter a number" }).min(0, "Must be 0 or more").max(1e9);
+// Order matters: "" must be matched before z.coerce.number() turns it into 0.
 const optNum = z
-  .union([z.coerce.number().min(0), z.literal(""), z.null(), z.undefined()])
+  .union([z.literal(""), z.null(), z.undefined(), z.coerce.number().min(0)])
   .transform((v) => (v === "" || v === null || v === undefined ? null : Number(v)));
 const email = z.string().trim().toLowerCase().email("Enter a valid email");
 const name = z.string().trim().min(1, "Required").max(120);

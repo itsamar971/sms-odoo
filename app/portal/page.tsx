@@ -15,11 +15,24 @@ import { portalOverview } from "@/lib/services/portal";
 import { isOverdue } from "@/lib/services/invoices";
 import { portalPayAction } from "@/app/actions/portal";
 
-export default function PortalHome() {
+const TABS = [
+  { key: "active", label: "Active", statuses: ["ACTIVE"] },
+  { key: "quotes", label: "Quotations", statuses: ["QUOTATION", "CONFIRMED"] },
+  { key: "paused", label: "Paused", statuses: ["PAUSED"] },
+  { key: "closed", label: "Closed", statuses: ["CLOSED"] },
+] as const;
+const PER_PAGE = 25;
+
+export default function PortalHome({ searchParams }: { searchParams: { tab?: string; page?: string } }) {
   const user = requirePermission("portal");
   const customer = getDb().customers.get(user.customerId);
   const o = portalOverview(user.customerId!);
   const today = todayStr();
+  const tab = TABS.find((t) => t.key === searchParams.tab) ?? TABS[0];
+  const inTab = o.subscriptions.filter((s) => (tab.statuses as readonly string[]).includes(s.status));
+  const pageCount = Math.max(1, Math.ceil(inTab.length / PER_PAGE));
+  const page = Math.min(Math.max(1, Number(searchParams.page) || 1), pageCount);
+  const visible = inTab.slice((page - 1) * PER_PAGE, page * PER_PAGE);
   return (
     <div className="space-y-6">
       <div>
@@ -39,11 +52,22 @@ export default function PortalHome() {
 
       <Card>
         <CardHeader><CardTitle>Subscriptions</CardTitle><CardDescription>Pause or cancel where your plan allows it.</CardDescription></CardHeader>
-        {o.subscriptions.length === 0 ? <CardContent><EmptyState title="No subscriptions yet" description="Our team will send you a quotation." /></CardContent> : (
+        <div className="flex gap-1 border-b px-5">
+          {TABS.map((t) => {
+            const n = o.subscriptions.filter((s) => (t.statuses as readonly string[]).includes(s.status)).length;
+            return (
+              <Link key={t.key} href={`/portal?tab=${t.key}`} scroll={false}
+                className={`-mb-px border-b-2 px-3 py-2 text-sm ${t.key === tab.key ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+                {t.label} <span className="text-xs text-muted-foreground">{n}</span>
+              </Link>
+            );
+          })}
+        </div>
+        {visible.length === 0 ? <CardContent className="pt-5"><EmptyState title={`No ${tab.label.toLowerCase()} subscriptions`} /></CardContent> : (
           <Table>
             <THead><TR><TH>Subscription</TH><TH>Plan</TH><TH>Status</TH><TH>Next invoice</TH><TH className="text-right">Amount</TH><TH /></TR></THead>
             <TBody>
-              {o.subscriptions.map((s) => (
+              {visible.map((s) => (
                 <TR key={s.id}>
                   <TD><Link href={`/portal/subscriptions/${s.id}`} className="font-medium text-primary hover:underline">{s.number}</Link></TD>
                   <TD>{s.planName} <span className="text-xs text-muted-foreground">· {periodLabel(s.plan.billingPeriod, s.plan.intervalCount).toLowerCase()}</span></TD>
@@ -55,6 +79,15 @@ export default function PortalHome() {
               ))}
             </TBody>
           </Table>
+        )}
+        {pageCount > 1 && (
+          <div className="flex items-center justify-between border-t px-5 py-2.5 text-sm text-muted-foreground">
+            <span>Page {page} of {pageCount} · {inTab.length} subscriptions</span>
+            <div className="flex gap-2">
+              {page > 1 && <Link scroll={false} className={buttonClass("outline", "sm")} href={`/portal?tab=${tab.key}&page=${page - 1}`}>Previous</Link>}
+              {page < pageCount && <Link scroll={false} className={buttonClass("outline", "sm")} href={`/portal?tab=${tab.key}&page=${page + 1}`}>Next</Link>}
+            </div>
+          </div>
         )}
       </Card>
 

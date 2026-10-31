@@ -38,7 +38,7 @@ export default function SubscriptionDetail({ params, searchParams }: { params: {
   const actions = availableActions(sub, plan, today);
   let preview: ReturnType<typeof priceSubscription> | null = null;
   try { preview = priceSubscription(sub, today); } catch { preview = null; }
-  const history = db.statusHistory.by("entityId", sub.id).slice().sort((a, b) => b.at.getTime() - a.at.getTime());
+  const history = db.statusHistory.by("entityId", sub.id).map((h, i) => ({ h, i })).sort((a, b) => b.h.at.getTime() - a.h.at.getTime() || b.i - a.i).map((x) => x.h);
   const invoices = listInvoices(searchParams, { subscriptionId: sub.id });
   const template = sub.templateId ? db.templates.get(sub.templateId) : undefined;
   const quotationExpired = sub.status === "QUOTATION" && sub.quotationValidUntil && sub.quotationValidUntil < today;

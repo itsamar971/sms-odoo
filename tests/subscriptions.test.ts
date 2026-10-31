@@ -50,3 +50,14 @@ describe("subscription state machine", () => {
     expect(() => transitionSubscription(sub.id, "PAUSED", admin.id)).toThrow(/does not allow pausing/);
   });
 });
+
+describe("line validation", () => {
+  it("treats an empty unit price as 'use the catalog price', not 0", () => {
+    const { customer, plan, product, admin, db } = makeFixture();
+    const sub = createSubscription(
+      { customerId: customer.id, planId: plan.id, startDate: "2026-02-01", paymentTerms: "NET15", lines: [{ productId: product.id, quantity: "2", unitPrice: "" } as never] },
+      admin.id,
+    );
+    expect(db.subscriptionLines.by("subscriptionId", sub.id)[0].unitPrice).toBe(100);
+  });
+});

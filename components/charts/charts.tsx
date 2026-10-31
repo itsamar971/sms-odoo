@@ -35,8 +35,8 @@ export function RevenueTrendChart({ data }: { data: { month: string; invoiced: n
         <YAxis tickFormatter={(v) => formatMoneyCompact(v)} tick={AXIS} axisLine={false} tickLine={false} width={64} />
         <Tooltip content={<MoneyTooltip />} cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }} />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: "#374151" }} />
-        <Line type="monotone" dataKey="invoiced" name="Invoiced" stroke={SERIES_1} strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} />
-        <Line type="monotone" dataKey="collected" name="Collected" stroke={SERIES_2} strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} />
+        <Line type="monotone" dataKey="invoiced" name="Invoiced" stroke={SERIES_1} strokeWidth={2} isAnimationActive={false} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} />
+        <Line type="monotone" dataKey="collected" name="Collected" stroke={SERIES_2} strokeWidth={2} isAnimationActive={false} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -50,7 +50,7 @@ export function StatusBarChart({ data }: { data: { status: string; count: number
         <XAxis type="number" hide />
         <YAxis type="category" dataKey="label" tick={AXIS} axisLine={false} tickLine={false} width={80} />
         <Tooltip cursor={{ fill: "#f3f4f6" }} formatter={(v: number) => [v.toLocaleString("en-IN"), "Subscriptions"]} contentStyle={{ fontSize: 12, borderRadius: 6 }} />
-        <Bar dataKey="count" fill={SERIES_1} radius={[0, 4, 4, 0]}>
+        <Bar dataKey="count" isAnimationActive={false} fill={SERIES_1} radius={[0, 4, 4, 0]}>
           <LabelList dataKey="count" position="right" formatter={(v: number) => v.toLocaleString("en-IN")} style={{ fontSize: 11, fill: "#374151" }} />
         </Bar>
       </BarChart>
@@ -65,7 +65,7 @@ export function AgingChart({ data }: { data: { bucket: string; amount: number }[
         <XAxis dataKey="bucket" tick={AXIS} axisLine={false} tickLine={false} tickFormatter={(b) => `${b} days`} />
         <YAxis hide />
         <Tooltip cursor={{ fill: "#f3f4f6" }} formatter={(v: number) => [formatMoney(v), "Overdue"]} contentStyle={{ fontSize: 12, borderRadius: 6 }} />
-        <Bar dataKey="amount" fill={SERIES_1} radius={[4, 4, 0, 0]}>
+        <Bar dataKey="amount" isAnimationActive={false} fill={SERIES_1} radius={[4, 4, 0, 0]}>
           <LabelList dataKey="amount" position="top" formatter={(v: number) => formatMoneyCompact(v)} style={{ fontSize: 11, fill: "#374151" }} />
         </Bar>
       </BarChart>
