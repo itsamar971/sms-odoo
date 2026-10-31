@@ -66,7 +66,7 @@ export function listSubscriptions(sp: SearchParams, scope: { customerId?: string
   });
 }
 
-export function listInvoices(sp: SearchParams, scope: { customerId?: string; subscriptionId?: string } = {}) {
+export function listInvoices(sp: SearchParams, scope: { customerId?: string; subscriptionId?: string; excludeDraft?: boolean } = {}) {
   const db = getDb();
   const today = todayStr();
   const status = str(sp, "status") as InvoiceStatus | "OVERDUE" | undefined;
@@ -86,7 +86,7 @@ export function listInvoices(sp: SearchParams, scope: { customerId?: string; sub
           : db.invoices.all();
   rows = rows.filter(
     (i) =>
-      (!status || status === "OVERDUE" || i.status === status) && (!overdue || isOverdue(i, today)) && (!customerId || i.customerId === customerId) &&
+      (!scope.excludeDraft || i.status !== "DRAFT") && (!status || status === "OVERDUE" || i.status === status) && (!overdue || isOverdue(i, today)) && (!customerId || i.customerId === customerId) &&
       (!from || i.invoiceDate >= from) && (!to || i.invoiceDate <= to) && (!q || lc(i.number).includes(lc(q))),
   );
   const mapped = rows.map((i) => {
